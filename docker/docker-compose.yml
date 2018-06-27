@@ -1,0 +1,48 @@
+version: '3'
+services:
+   magento:
+      image: prova/build:latest
+      #build:
+      #   context: ../
+      #   dockerfile: docker/Dockerfile
+      ports:
+         - 8080:8080
+         - 80:80
+         - 443:443
+         #- 9001:9000 # xdebug
+      volumes:
+         #- source_volume:/var/www/html
+         - ../sources:/var/www/html
+      depends_on:
+         - db
+         - redis
+      links:
+         - db:dbhost
+         - redis
+      networks:
+         - internal-network
+   db:
+      image: mariadb
+      ports:
+         - 3306:3306
+      environment:
+         - MYSQL_ROOT_PASSWORD=root
+         - MYSQL_DATABASE=magento
+         - MYSQL_USER=magento
+         - MYSQL_PASSWORD=magento
+      volumes:
+         - ../database:/var/lib/mysql
+      networks:
+         - internal-network
+   redis:
+      image: redis
+      ports:
+         - 6379:6379
+      networks:
+         internal-network:
+            aliases:
+               - redishost
+networks:
+   internal-network:
+      driver: bridge
+      
